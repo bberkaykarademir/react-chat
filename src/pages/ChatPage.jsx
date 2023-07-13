@@ -1,39 +1,39 @@
 import React, { useEffect, useState } from "react";
-// import { collection, query, onSnapshot, orderBy, limit } from "firebase/firestore";
 import { addDoc, serverTimestamp } from "firebase/firestore";
-
-import {
-  collection,
-  query,
-  onSnapshot,
-  orderBy,
-  limit,
-} from "firebase/firestore";
+import { collection, query, onSnapshot, orderBy } from "firebase/firestore";
 import db from "../database/firebase";
 
+import ChatBox from "../components/ChatBox";
+import Users from "../components/Users";
+import SendMessage from "../components/SendMessage";
+
 const ChatPage = () => {
+
   const [value, setValue] = useState("");
+
   const handleSendMessage = async (e) => {
     e.preventDefault();
 
-    if (value.trim() === "") {
+    if (value.trim() === "" || value.length > 50) {
       alert("Enter valid message!");
       return;
     }
-
+    let textValue = value;
+    setValue("");
     try {
       await addDoc(collection(db, "messages"), {
-        text: value,
-        name: localStorage.getItem("chat-username"),
+        text: textValue,
+        name: JSON.parse(localStorage.getItem("chat-username")),
         createdAt: serverTimestamp(),
       });
     } catch (error) {
       console.log(error);
     }
-    setValue("");
+
   };
 
   const [messages, setMessages] = useState([]);
+
   useEffect(() => {
     const q = query(collection(db, "messages"), orderBy("createdAt"));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -43,10 +43,12 @@ const ChatPage = () => {
       });
       setMessages(messages);
     });
+    console.log(messages);
 
     return () => unsubscribe;
   }, []);
 
+  const users = [...new Set(messages.map((message) => message.name))];
   return (
     <div className="w-full h-screen bg-[#326FFD] flex">
       <div className="2xl:container w-full h-screen 2xl:h-auto flex flex-col mx-auto my-auto ">
@@ -55,53 +57,21 @@ const ChatPage = () => {
             Real Time Chat App
           </h2>
         </div>
-        <div className="w-full flex flex-grow ">
-          <div className="bg-[#F9F8F8] flex-grow xl:h-[600px] p-4 overflow-y-scroll">
-            {messages.map((message) => (
-              <p>{message.text}</p>
-            ))}
-          </div>
-          <div className="p-3 w-1/3 sm:w-1/6 bg-[#172838] text-white">
-            <div className="h-1/2">
-              <h3 className="border-y">Online Users</h3>
-            </div>
-            <div>
-              <h3 className="border-y">Offline Users</h3>
-            </div>
-          </div>
+        <div className="w-full flex flex-grow overflow-hidden">
+          <ChatBox messages={messages} />
+          <Users users={users} />
         </div>
-        <form
-          onSubmit={handleSendMessage}
-          className="w-full bg-[#272838] flex text-white text-lg"
-        >
-          <input
-            type="text"
-            className="bg-[#272838] flex-grow p-2 sm:p-4 outline-none"
-            placeholder="Message"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-          />
-          <button className="p-3 w-1/3 sm:w-1/6 bg-[#2A324B]">Send</button>
-        </form>
+
+        <SendMessage
+          handleSendMessage={handleSendMessage}
+          setValue={setValue}
+          value={value}
+
+        />
+
       </div>
     </div>
   );
 };
 
 export default ChatPage;
-
-// {messages.map((messages, index) => (
-//   <div key={index}>
-//     {messages.text}
-//   </div>
-// ))}
-
-// const messagesRef = collection(db, "messages");
-//   const q = query(messagesRef, orderBy("timestamp"));
-
-//   useEffect(() => {
-//     onSnapshot(q, (snapshot) => {
-//       setMessages(snapshot.docs.map((doc) => doc.data()));
-//     });
-//     console.log(messages);
-//   }, []);

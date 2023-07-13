@@ -45,21 +45,3 @@ export default db
 
 
 
-
-// const messagesRef = collection(db, "messages");
-
-// export const createUser = async (username) => {
-//   await setDoc(doc(db, "messages", username), {});
-// };
-
-// //şu alttakine iyi bak
-
-// export const useMessagesListener = () => {
-//   useEffect(() => {
-//     return onSnapshot(messagesRef, (snapshot) => {
-//       console.log(snapshot.docs.map((doc) => doc.data()));
-//     });
-//   }, []);
-// };
-
-// export default db;

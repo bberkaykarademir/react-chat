@@ -1,14 +1,14 @@
 import React, { useState } from "react";
-// import { createUser } from "../database/firebase";
 import { useNavigate } from "react-router-dom";
 
-const LoginPage = () => {
+const LoginPage = ({ access, setAccess }) => {
   const [username, setUsername] = useState();
   const navigate = useNavigate();
   const submitHandler = async (e) => {
     e.preventDefault();
     if (username.trim().length > 0 && username.length < 10) {
       localStorage.setItem("chat-username", JSON.stringify(username));
+      setAccess(true);
       navigate("/chat");
     } else {
       alert("username length must be between 1 and 9 characters");
@@ -44,21 +44,3 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-
-
-
-
-
-
-
-
-// const submitHandler = async (e) => {
-//   e.preventDefault();
-//   if (username.trim().length > 0 && username.trim().length < 10) {
-//     localStorage.setItem("chat-username", JSON.stringify(username));
-//     await createUser(username);
-//     navigate("/chat");
-//   } else {
-//     alert("username length must be between 1 and 9 characters");
-//   }
-// };
